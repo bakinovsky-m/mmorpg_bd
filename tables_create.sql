@@ -114,6 +114,7 @@ number_in_quest_line int,
 
 constraint fk_quests_reward_item foreign key(reward_item) references items(id),
 constraint fk_quests_quest_line foreign key(quest_line) references quest_lines(id)
+--foreign key(quest_line) references quest_lines(id)
 );
 --go
 

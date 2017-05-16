@@ -67,3 +67,15 @@ insert into items_on_auction(auction, item, start_price, current_price, ransom_p
 insert into raid_groups(name, dungeon, leader) values
 ('test', 5, 2)
 --17 end
+
+--20
+insert into quest_lines(name, description_) values
+('test', 'test')
+
+insert into quests(name, description_, quest_line) values
+('test', 'test', 6),
+('test', 'test', 6),
+('test', 'test', 6)
+
+delete from quest_lines where id = 6
+--20 end

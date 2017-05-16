@@ -309,3 +309,38 @@ begin
 end
 go
 --17 end
+
+--20
+if OBJECT_ID ('quest_line_delete_quest_delete', 'tr') is not null
+	drop trigger quest_line_delete_quest_delete
+go
+
+create trigger quest_line_delete_quest_delete
+on quest_lines
+instead of delete
+as 
+begin
+	declare @quest_line int
+
+	declare cur1 cursor for (select id from deleted)
+	open cur1
+	fetch next from cur1 into @quest_line
+	while @@FETCH_STATUS=0
+	begin
+		declare @quest int
+		declare cur2 cursor for (select id from quests where quest_line = @quest_line)
+		open cur2
+		fetch next from cur2 into @quest
+		while @@FETCH_STATUS = 0
+		begin
+			delete from quests where id = @quest
+			fetch next from cur2 into @quest
+		end
+		delete from quest_lines where id = @quest_line
+		close cur2
+		fetch next from cur1 into @quest_line
+	end
+	close cur1
+end
+go
+--20 end
