@@ -330,6 +330,7 @@ constraint fk_items_in_cell_item foreign key(item) references items(id)
 go
 
 create table items_in_inventory(
+id int identity(1,1),
 inv int not null,
 item int not null,
 
@@ -438,3 +439,5 @@ constraint fk_items_on_auction_last_better foreign key(last_better) references c
 constraint fk_items_on_auction_owner foreign key(owner_) references characters(id),
 );
 go
+
+exec fill_tables
