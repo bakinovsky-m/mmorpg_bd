@@ -162,7 +162,7 @@ insert into dungeons(name, min_lvl, location, achievement) values
 ('very strange cave', 15, 2, null),
 ('old castle', 25, 3, null),
 ('old cemetery', 25, 1, null),
-('drans mountain', 50, 4, 5)
+('dragons mountain', 50, 4, 5)
 
 
 insert into teachers(name, lvl, city) values
@@ -423,3 +423,5 @@ insert into items_on_auction(auction, item, start_price, current_price, ransom_p
 
 
 end
+
+--exec fill_tables

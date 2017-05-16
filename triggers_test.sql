@@ -1,5 +1,27 @@
 use mmorpg
 
+--1
+insert into skills_on_char(skill, char_) values
+(3, 2)
+--1 end
+
+--3.1
+insert into inventories(size, fullness) values
+(10,10)
+insert into items_in_inventory(inv, item) values
+(6, 1)
+--3.1 end
+
+--3.2
+insert into inventories(size, fullness) values
+(15,10)
+select * from inventories where id = 6
+insert into items_in_inventory(inv, item) values (6, 5)
+select * from inventories where id = 6
+delete from items_in_inventory where id = 6 
+select * from inventories where id = 6
+--3.2 end
+
 --4
 select * from characters
 update characters
@@ -40,3 +62,8 @@ select * from characters
 insert into items_on_auction(auction, item, start_price, current_price, ransom_price, last_better, owner_) values
 (1,1,   2   ,1,   2   ,2,1)
 --12 end
+
+--17
+insert into raid_groups(name, dungeon, leader) values
+('test', 5, 2)
+--17 end

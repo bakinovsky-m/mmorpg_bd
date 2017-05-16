@@ -1,5 +1,116 @@
-use mmorpg
+use mmorpg;
+go
 
+--1
+if OBJECT_ID ('skill_class_and_lvl_check', 'tr') is not null
+	drop trigger skill_class_and_lvl_check;
+go
+
+create trigger skill_class_and_lvl_check
+on skills_on_char
+for insert, update
+as 
+begin
+	declare @char int, @skill int
+
+	declare cur cursor for (select char_, skill from inserted)
+	open cur
+	fetch next from cur into @char, @skill
+	while @@FETCH_STATUS=0
+	begin
+		declare @char_class int, @char_lvl int, @skill_min_lvl int--, @skill_class int
+		set @char_class = (select class from characters where id = @char)
+		set @char_lvl = (select level_ from characters where id = @char)
+		set @skill_min_lvl = (select min_lvl from skills where id = @skill)
+		--set @skill_class = (select * from skills_on_class)
+		if (not exists (select * from skills_on_class where (skill = @skill and class = @char_class)) or @skill_min_lvl > @char_lvl)
+			--print '1'
+			rollback tran
+			
+		--if (@skill_min_lvl > @char_lvl)
+		--	print '2'
+		--	rollback tran
+			
+
+		fetch next from cur into @char, @skill
+	end
+	close cur
+end
+go
+--1 end
+
+--3.1
+if OBJECT_ID ('inventory_space_check_and_item_add', 'tr') is not null
+	drop trigger inventory_space_check_and_item_add;
+go
+
+create trigger inventory_space_check_and_item_add
+on items_in_inventory
+for insert
+as 
+begin
+	declare @inv int
+
+	declare cur cursor for (select inv from inserted)
+	open cur
+	fetch next from cur into @inv
+	while @@FETCH_STATUS=0
+	begin
+		declare @inv_fullness int, @inv_capacity int
+		set @inv_capacity = (select size from inventories where id = @inv)
+		set @inv_fullness = (select fullness from inventories where id = @inv)
+
+		set @inv_fullness += 1
+		if (@inv_fullness >= @inv_capacity)
+			rollback tran
+		else
+		begin
+			update inventories
+				set fullness = @inv_fullness where id = @inv
+		end
+
+		fetch next from cur into @inv
+	end
+	close cur
+end
+go
+--3.1 end
+
+--3.2
+if OBJECT_ID ('inventory_item_delete', 'tr') is not null
+	drop trigger inventory_item_delete;
+go
+
+create trigger inventory_item_delete
+on items_in_inventory
+for delete
+as 
+begin
+	declare @inv int
+
+	declare cur cursor for (select inv from deleted)
+	open cur
+	fetch next from cur into @inv
+	while @@FETCH_STATUS=0
+	begin
+		declare @inv_fullness int
+		set @inv_fullness = (select fullness from inventories where id = @inv)
+
+		set @inv_fullness -= 1
+		if (@inv_fullness <= 0)
+			rollback tran
+		else
+		begin
+			update inventories
+				set fullness = @inv_fullness where id = @inv
+		end
+
+		fetch next from cur into @inv
+	end
+	close cur
+end
+go
+--3.2 end
 -- 4
 if OBJECT_ID ('exp_lvl_check', 'tr') is not null
 	drop trigger exp_lvl_check;
@@ -167,3 +278,34 @@ begin
 end
 go
 --12 end
+
+--17
+if OBJECT_ID ('raid_lvl_dungeon_check', 'tr') is not null
+	drop trigger raid_lvl_dungeon_check
+go
+
+create trigger raid_lvl_dungeon_check
+on raid_groups
+for insert, update
+as 
+begin
+	declare @dungeon int, @leader int
+
+	declare cur cursor for (select dungeon, leader from inserted)
+	open cur
+	fetch next from cur into @dungeon, @leader
+	while @@FETCH_STATUS=0
+	begin
+		declare @d_lvl int, @l_lvl int
+		set @d_lvl = (select min_lvl from dungeons where id = @dungeon)
+		set @l_lvl = (select level_ from characters where id = @leader)
+
+		if (@l_lvl < @d_lvl)
+			rollback tran
+
+		fetch next from cur into @dungeon, @leader
+	end
+	close cur
+end
+go
+--17 end
