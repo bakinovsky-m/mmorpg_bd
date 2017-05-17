@@ -310,6 +310,39 @@ end
 go
 --12 end
 
+--13
+if OBJECT_ID ('quest_auto_increment', 'tr') is not null
+	drop trigger quest_auto_increment
+go
+
+create trigger quest_auto_increment
+on quests
+for insert
+as 
+begin
+	declare @id int, @quest_line int, @number_in_quest_line int
+
+	declare cur cursor for (select id, quest_line, number_in_quest_line from inserted)
+	open cur
+	fetch next from cur into @id, @quest_line, @number_in_quest_line
+	while @@FETCH_STATUS=0
+	begin
+		declare @last_number int
+		if (@quest_line is not null and @number_in_quest_line is null)
+		begin
+			set @last_number = (select top(1) number_in_quest_line from quests where quest_line = @quest_line order by number_in_quest_line desc)
+			update quests
+				set number_in_quest_line = (@last_number + 1) where id = @id
+		end
+
+		fetch next from cur into @id, @quest_line, @number_in_quest_line
+	end
+	close cur
+end
+go
+--select top(1) number_in_quest_line from quests where quest_line = 1 order by number_in_quest_line desc
+--13 end
+
 --17
 if OBJECT_ID ('raid_lvl_dungeon_check', 'tr') is not null
 	drop trigger raid_lvl_dungeon_check

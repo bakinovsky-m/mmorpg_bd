@@ -71,6 +71,13 @@ insert into items_on_auction(auction, item, start_price, current_price, ransom_p
 (1,1,   2   ,1,   2   ,2,1)
 --12 end
 
+--13
+select * from quests
+insert into quests(name, description_, quest_line) values
+('test', 'test', 1)
+select * from quests
+--13 end
+
 --17
 insert into raid_groups(name, dungeon, leader) values
 ('test', 5, 2)

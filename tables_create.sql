@@ -343,7 +343,7 @@ id int identity(1,1),
 inv int not null,
 item int not null,
 
-durability_ int,
+durability_ int default 100,
 on_char bit,
 
 constraint fk_items_in_inv_item foreign key(item) references items(id),
