@@ -78,6 +78,13 @@ insert into quests(name, description_, quest_line) values
 select * from quests
 --13 end
 
+--14
+select * from items_in_inventory
+insert into items_in_inventory(inv, item, on_char) values
+(5, 2, 1)
+select * from items_in_inventory
+--14 end
+
 --17
 insert into raid_groups(name, dungeon, leader) values
 ('test', 5, 2)

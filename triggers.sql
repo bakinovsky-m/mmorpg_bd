@@ -343,6 +343,54 @@ go
 --select top(1) number_in_quest_line from quests where quest_line = 1 order by number_in_quest_line desc
 --13 end
 
+--14
+if OBJECT_ID ('item_wore_check', 'tr') is not null
+	drop trigger item_wore_check
+go
+
+create trigger item_wore_check
+on items_in_inventory
+for insert, update
+as 
+begin
+	declare @this_id int, @inv int, @item int, @on_char bit
+
+	declare cur1 cursor for (select id, inv, item, on_char from inserted)
+	open cur1
+	fetch next from cur1 into @this_id, @inv, @item, @on_char
+	while @@FETCH_STATUS=0
+	begin
+		if @on_char = 1
+		begin
+			declare @this_item_type int
+			set @this_item_type = (select type_ from items where id = @item)
+
+			--if (select * from items_in_inventory where item.type_ = @this_item_type) is not null
+			declare @id int, @it int, @in int, @onc bit
+			declare cur2 cursor for (select id, item, inv, on_char from items_in_inventory)
+			open cur2
+			fetch next from cur2 into @id, @it, @in, @onc
+			while @@FETCH_STATUS = 0
+			begin
+				declare @it_type int
+				set @it_type = (select type_ from items where id = @it)
+				if (@it_type = @this_item_type and @in = @inv and @onc = 1)
+				begin
+					update items_in_inventory
+						set on_char = 0 where (id = @id and id <> @this_id)
+				end
+				fetch next from cur2 into @id, @it, @in, @onc
+			end
+			close cur2
+		end
+
+		fetch next from cur1 into @this_id, @inv, @item, @on_char
+	end
+	close cur1
+end
+go
+--14 end
+
 --17
 if OBJECT_ID ('raid_lvl_dungeon_check', 'tr') is not null
 	drop trigger raid_lvl_dungeon_check
