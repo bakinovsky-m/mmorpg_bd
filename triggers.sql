@@ -252,6 +252,37 @@ end
 go
 --10 end
 
+--11
+if OBJECT_ID ('item_add_min_level_check', 'tr') is not null
+	drop trigger item_add_min_level_check
+go
+
+create trigger item_add_min_level_check
+on items_in_inventory
+for insert
+as 
+begin
+	declare @item int, @inventory int
+
+	declare cur cursor for (select item, inv from inserted)
+	open cur
+	fetch next from cur into @item, @inventory
+	while @@FETCH_STATUS=0
+	begin
+		declare @item_min_lvl int, @char_lvl int
+		set @item_min_lvl = (select min_lvl from items where id = @item)
+		set @char_lvl = (select level_ from characters where inventory = @inventory)
+
+		if @item_min_lvl > @char_lvl
+			rollback tran
+
+		fetch next from cur into @item, @inventory
+	end
+	close cur
+end
+go
+--11 end
+
 --12
 if OBJECT_ID ('auction_add_item_min_max_price_check', 'tr') is not null
 	drop trigger auction_add_item_min_max_price_check

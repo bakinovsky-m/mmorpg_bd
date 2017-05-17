@@ -58,6 +58,14 @@ insert into characters(name, race, class, health, attack, defense, experience, l
 select * from characters
 --10 end
 
+--11
+insert into inventories(size, fullness) values (10, 5)
+insert into characters(name, race, class, health, attack, defense, experience, level_, inventory, guild, fraction) values
+('test', 1, 3, 10000, 5000, 5000, 0, 1, 6, 3, 1)
+insert into items_in_inventory(item, inv, durability_) values
+(2, 6, 100)
+--11 end
+
 --12
 insert into items_on_auction(auction, item, start_price, current_price, ransom_price, last_better, owner_) values
 (1,1,   2   ,1,   2   ,2,1)
