@@ -18,19 +18,13 @@ begin
 	fetch next from cur into @char, @skill
 	while @@FETCH_STATUS=0
 	begin
-		declare @char_class int, @char_lvl int, @skill_min_lvl int--, @skill_class int
+		declare @char_class int, @char_lvl int, @skill_min_lvl int
 		set @char_class = (select class from characters where id = @char)
 		set @char_lvl = (select level_ from characters where id = @char)
 		set @skill_min_lvl = (select min_lvl from skills where id = @skill)
-		--set @skill_class = (select * from skills_on_class)
+
 		if (not exists (select * from skills_on_class where (skill = @skill and class = @char_class)) or @skill_min_lvl > @char_lvl)
-			--print '1'
 			rollback tran
-			
-		--if (@skill_min_lvl > @char_lvl)
-		--	print '2'
-		--	rollback tran
-			
 
 		fetch next from cur into @char, @skill
 	end
@@ -341,7 +335,7 @@ begin
 	close cur
 end
 go
---select top(1) number_in_quest_line from quests where quest_line = 1 order by number_in_quest_line desc
+
 --13 end
 
 --14
@@ -366,7 +360,6 @@ begin
 			declare @this_item_type int
 			set @this_item_type = (select type_ from items where id = @item)
 
-			--if (select * from items_in_inventory where item.type_ = @this_item_type) is not null
 			declare @id int, @it int, @in int, @onc bit
 			declare cur2 cursor for (select id, item, inv, on_char from items_in_inventory)
 			open cur2
@@ -392,12 +385,6 @@ end
 go
 --14 end
 
---16. ѕри добавлении и удалении записи в Уƒостижени€Ф пересчЄт процента выполненных достижений дл€ всех аккаунтов
---»м€: achivements_recalculate
---“аблица: Уƒостижени€Ф
---ƒействие дл€ срабатывани€: insert, delete
---»спользует: Уƒостижени€Ф, Уƒостижени€_у_аккаунтаФ, УјккаунтФ
---»змен€ет: УјккаунтФ
 --16
 if OBJECT_ID ('achivements_recalculate', 'tr') is not null
 	drop trigger achivements_recalculate
@@ -409,11 +396,10 @@ for insert, delete
 as 
 begin
 	declare @count int
-	--set @count = 0
 	set @count = (select count(*) from achievements)
 	declare cur1 cursor for (select * from inserted)
 	open cur1
-	fetch next from cur1-- into @dungeon, @leader
+	fetch next from cur1
 	while @@FETCH_STATUS=0
 	begin
 		
@@ -430,13 +416,12 @@ begin
 			set @res = (@a/@b)
 
 			update accounts
-				--set percentage_of_achievements = cast((@ach_count/@count) as float) where id = @account
 				set percentage_of_achievements = @res where id = @account
 
 			fetch next from cur2 into @account
 		end
 		close cur2
-		fetch next from cur1-- into @dungeon, @leader
+		fetch next from cur1
 	end
 	close cur1
 end
