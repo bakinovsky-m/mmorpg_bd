@@ -75,10 +75,10 @@ insert into quest_lines(name, description_) values
 
 
 insert into accounts(login_, password_, characters_count, max_characters, percentage_of_achievements) values
-('admin', 'admin', 0, 100, 0),
-('gamemaster', 'gamemaster', 0, 100, 0),
+('admin', 'admin_pass', 0, 100, 0),
+('gamemaster', 'gamemaster_pass', 0, 100, 0),
 ('thechoosenone', 'alwaysontop', 10, 10, 100),
-('noob', 'noob', 1, 5, 0),
+('noob', '12345', 1, 5, 0),
 ('gaben', 'hl3confirmed', 2, 5, 24)
 
 

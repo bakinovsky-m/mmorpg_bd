@@ -188,10 +188,11 @@ begin
 		declare @max_char int, @char_count int
 		set @max_char = (select max_characters from accounts where login_ = @login)
 		set @char_count = (select characters_count from accounts where login_ = @login)
-		if ((@char_count + 1) > @max_char)
+		if (@char_count > @max_char)
 			rollback transaction
 		fetch next from cur into @login, @password
 	end
+	close cur
 end
 go
 --7 end
@@ -390,6 +391,57 @@ begin
 end
 go
 --14 end
+
+--16. ѕри добавлении и удалении записи в Уƒостижени€Ф пересчЄт процента выполненных достижений дл€ всех аккаунтов
+--»м€: achivements_recalculate
+--“аблица: Уƒостижени€Ф
+--ƒействие дл€ срабатывани€: insert, delete
+--»спользует: Уƒостижени€Ф, Уƒостижени€_у_аккаунтаФ, УјккаунтФ
+--»змен€ет: УјккаунтФ
+--16
+if OBJECT_ID ('achivements_recalculate', 'tr') is not null
+	drop trigger achivements_recalculate
+go
+
+create trigger achivements_recalculate
+on achievements
+for insert, delete
+as 
+begin
+	declare @count int
+	--set @count = 0
+	set @count = (select count(*) from achievements)
+	declare cur1 cursor for (select * from inserted)
+	open cur1
+	fetch next from cur1-- into @dungeon, @leader
+	while @@FETCH_STATUS=0
+	begin
+		
+		declare @account int
+		declare cur2 cursor for (select id from accounts)
+		open cur2
+		fetch next from cur2 into @account
+		while @@FETCH_STATUS = 0
+		begin
+			declare @ach_count int, @res float, @a float, @b float
+			set @ach_count = (select count(*) from achievs_on_account where account = @account)
+			set @a = (select cast(@ach_count as float))
+			set @b = (select cast(@count as float))
+			set @res = (@a/@b)
+
+			update accounts
+				--set percentage_of_achievements = cast((@ach_count/@count) as float) where id = @account
+				set percentage_of_achievements = @res where id = @account
+
+			fetch next from cur2 into @account
+		end
+		close cur2
+		fetch next from cur1-- into @dungeon, @leader
+	end
+	close cur1
+end
+go
+--16 end
 
 --17
 if OBJECT_ID ('raid_lvl_dungeon_check', 'tr') is not null

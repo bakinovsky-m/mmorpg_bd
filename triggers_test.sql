@@ -85,6 +85,13 @@ insert into items_in_inventory(inv, item, on_char) values
 select * from items_in_inventory
 --14 end
 
+--16
+select * from accounts
+insert into achievements(name) values
+('test')
+select * from accounts
+--16 end
+
 --17
 insert into raid_groups(name, dungeon, leader) values
 ('test', 5, 2)
