@@ -150,8 +150,10 @@ insert into raid_groups(name, dungeon, leader) values
 
 --18
 select * from items_in_inventory
+select * from items_in_cell
 delete from banks where id = 1
 select * from items_in_inventory
+select * from items_in_cell
 --18 end
 
 --19

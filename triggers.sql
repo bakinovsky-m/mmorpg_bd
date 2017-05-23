@@ -637,22 +637,22 @@ begin
 
 	declare @bank_id int
 
-	declare cur1 cursor for (select id from deleted)
-	open cur1
-	fetch next from cur1 into @bank_id
+	declare cur118 cursor for (select id from deleted)
+	open cur118
+	fetch next from cur118 into @bank_id
 	while @@FETCH_STATUS=0
 	begin
 		declare @cell int, @char int
-		declare cur2 cursor for (select id, character_ from cell_in_bank where bank = @bank_id)
-		open cur2
-		fetch next from cur2 into @cell, @char
+		declare cur218 cursor for (select id, character_ from cell_in_bank where bank = @bank_id)
+		open cur218
+		fetch next from cur218 into @cell, @char
 		while @@FETCH_STATUS = 0
 		begin
 			declare @item int, @inv int
 			set @inv = (select inventory from characters where id = @char)
-			declare cur3 cursor for (select item from items_in_cell where cell = @cell)
-			open cur3
-			fetch next from cur3 into @item
+			declare cur318 cursor for (select item from items_in_cell where cell = @cell)
+			open cur318
+			fetch next from cur318 into @item
 			while @@FETCH_STATUS = 0
 			begin
 				begin try
@@ -661,21 +661,21 @@ begin
 					delete from items_in_cell where cell = @cell and item = @item
 				end try
 				begin catch
-					fetch next from cur3 into @item
+					fetch next from cur318 into @item
 					continue
 				end catch
-				fetch next from cur3 into @item
+				fetch next from cur318 into @item
 			end
-			close cur3
-			fetch next from cur2 into @cell, @char
+			close cur318
+			fetch next from cur218 into @cell, @char
 		end
-		close cur2
+		close cur218
 
 		delete from banks where id = @bank_id
 
-		fetch next from cur1 into @bank_id
+		fetch next from cur118 into @bank_id
 	end
-	close cur1
+	close cur118
 end
 go
 --18 end
