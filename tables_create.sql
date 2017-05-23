@@ -344,7 +344,7 @@ inv int not null,
 item int not null,
 
 durability_ int default 100,
-on_char bit,
+on_char bit default 0,
 
 constraint fk_items_in_inv_item foreign key(item) references items(id),
 constraint fk_items_in_inv_inv foreign key(inv) references inventories(id)

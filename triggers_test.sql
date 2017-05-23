@@ -148,6 +148,12 @@ insert into raid_groups(name, dungeon, leader) values
 ('test', 5, 2)
 --17 end
 
+--18
+select * from items_in_inventory
+delete from banks where id = 1
+select * from items_in_inventory
+--18 end
+
 --19
 select * from items_in_inventory
 insert into items_on_auction(item,auction,start_price,current_price,ransom_price,last_better,owner_) values

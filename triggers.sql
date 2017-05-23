@@ -99,7 +99,10 @@ begin
 
 		set @inv_fullness += 1
 		if (@inv_fullness >= @inv_capacity)
+		begin
+			raiserror('inv is full', 11, 2)
 			rollback tran
+		end
 		else
 		begin
 			update inventories
@@ -474,9 +477,14 @@ as
 begin
 	declare @this_id int, @inv int, @item int, @on_char bit
 
-	declare cur1 cursor for (select id, inv, item, on_char from inserted)
-	open cur1
-	fetch next from cur1 into @this_id, @inv, @item, @on_char
+	begin try
+	declare cur14 cursor for (select id, inv, item, on_char from inserted)
+	end try
+	begin catch
+		print(@@ERROR)
+	end catch
+	open cur14
+	fetch next from cur14 into @this_id, @inv, @item, @on_char
 	while @@FETCH_STATUS=0
 	begin
 		if @on_char = 1
@@ -502,9 +510,9 @@ begin
 			close cur2
 		end
 
-		fetch next from cur1 into @this_id, @inv, @item, @on_char
+		fetch next from cur14 into @this_id, @inv, @item, @on_char
 	end
-	close cur1
+	close cur14
 end
 go
 --14 end
@@ -614,6 +622,63 @@ begin
 end
 go
 --17 end
+
+--18
+if OBJECT_ID ('bank_delete_items_move', 'tr') is not null
+	drop trigger bank_delete_items_move
+go
+
+create trigger bank_delete_items_move
+on banks
+instead of delete
+as 
+begin
+	alter table cell_in_bank nocheck constraint all
+
+	declare @bank_id int
+
+	declare cur1 cursor for (select id from deleted)
+	open cur1
+	fetch next from cur1 into @bank_id
+	while @@FETCH_STATUS=0
+	begin
+		declare @cell int, @char int
+		declare cur2 cursor for (select id, character_ from cell_in_bank where bank = @bank_id)
+		open cur2
+		fetch next from cur2 into @cell, @char
+		while @@FETCH_STATUS = 0
+		begin
+			declare @item int, @inv int
+			set @inv = (select inventory from characters where id = @char)
+			declare cur3 cursor for (select item from items_in_cell where cell = @cell)
+			open cur3
+			fetch next from cur3 into @item
+			while @@FETCH_STATUS = 0
+			begin
+				begin try
+					insert into items_in_inventory(inv, item) values
+					(@inv, @item)
+					delete from items_in_cell where cell = @cell and item = @item
+				end try
+				begin catch
+					fetch next from cur3 into @item
+					continue
+				end catch
+				fetch next from cur3 into @item
+			end
+			close cur3
+			fetch next from cur2 into @cell, @char
+		end
+		close cur2
+
+		delete from banks where id = @bank_id
+
+		fetch next from cur1 into @bank_id
+	end
+	close cur1
+end
+go
+--18 end
 
 --19
 if OBJECT_ID ('auction_delete_items_move', 'tr') is not null
