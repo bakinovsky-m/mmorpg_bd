@@ -34,7 +34,7 @@ insert into talants(name, min_lvl) values
 
 
 insert into skills(name, min_lvl) values
-('firebolt', 1),
+('firebolt', 2),
 ('frost nova', 7),
 ('mind control', 25),
 ('stealth', 7),
@@ -218,9 +218,9 @@ insert into guilds(name, fraction) values
 insert into characters(name, race, class, health, attack, defense, experience, level_, inventory, guild, fraction) values
 ('TopOdinPaladin', 1, 2, 10000, 5000, 5000, 2694536178, 50, 1, 3, 1),
 ('Nagibator', 1, 2, 150, 11, 24, 74, 7, 2, null, 2),
-('Maksim', 6, 3, 150, 11, 24, 74, 7, 2, null, 2),
-('AnotherMaksim', 6, 3, 150, 11, 24, 74, 7, 2, 2, 2),
-('WhoIsMaksim', 6, 3, 150, 11, 24, 74, 7, 2, 2, 2)
+('Maksim', 6, 3, 150, 11, 24, 74, 7, 3, null, 2),
+('AnotherMaksim', 6, 3, 150, 11, 24, 74, 7, 4, 2, 2),
+('WhoIsMaksim', 6, 3, 150, 11, 24, 74, 7, 5, 2, 2)
 
 
 insert into exp_lvl_relation(exp_, lvl) values

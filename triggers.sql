@@ -33,6 +33,49 @@ end
 go
 --1 end
 
+--2
+if OBJECT_ID ('profession_skills_null_lvl_auto_add', 'tr') is not null
+	drop trigger profession_skills_null_lvl_auto_add;
+go
+
+create trigger profession_skills_null_lvl_auto_add
+on profs_on_char
+for insert
+as 
+begin
+	declare @prof int, @char int
+
+	declare cur1 cursor for (select profession, char_ from inserted)
+	open cur1
+	fetch next from cur1 into @prof, @char
+	while @@FETCH_STATUS=0
+	begin
+		declare @sk int, @pr int
+		declare cur2 cursor for (select skill, profession from skills_on_profession)
+		open cur2
+		fetch next from cur2 into @sk, @pr
+		while @@FETCH_STATUS = 0
+		begin
+			if @pr = @prof
+			begin
+				declare @min_lvl int
+				set @min_lvl = (select min_lvl from skills where id = @sk)
+				if @min_lvl <= 1
+				begin
+					insert into skills_on_char(char_, skill) values
+					(@char, @sk)
+				end
+			end
+			fetch next from cur2 into @sk, @pr	
+		end
+		close cur2
+		fetch next from cur1 into @prof, @char
+	end
+	close cur1
+end
+go
+--2 end
+
 --3.1
 if OBJECT_ID ('inventory_space_check_and_item_add', 'tr') is not null
 	drop trigger inventory_space_check_and_item_add;
@@ -159,6 +202,49 @@ end
 go
 -- 5 end
 
+--6
+if OBJECT_ID ('char_class_skills_add', 'tr') is not null
+	drop trigger char_class_skills_add;
+go
+
+create trigger char_class_skills_add
+on characters
+for insert
+as 
+begin
+	declare @id int, @class int
+
+	declare cur1 cursor for (select id, class from inserted)
+	open cur1
+	fetch next from cur1 into @id, @class
+	while @@FETCH_STATUS=0
+	begin
+		declare @skill int, @cl int
+		declare cur2 cursor for (select skill, class from skills_on_class)
+		open cur2
+		fetch next from cur2 into @skill, @cl
+		while @@FETCH_STATUS = 0
+		begin
+			if @cl = @class
+			begin
+				declare @min_lvl int
+				set @min_lvl = (select min_lvl from skills where id = @skill)
+				if @min_lvl <= 0
+				begin
+					insert into skills_on_char(char_, skill) values
+					(@id, @skill)
+				end
+			end
+			fetch next from cur2 into @skill, @cl	
+		end
+		close cur2
+		fetch next from cur1 into @id, @class
+	end
+	close cur1
+end
+go
+--6 end
+
 --7
 if OBJECT_ID ('account_add_check', 'tr') is not null
 	drop trigger account_add_check
@@ -183,13 +269,51 @@ begin
 		set @max_char = (select max_characters from accounts where login_ = @login)
 		set @char_count = (select characters_count from accounts where login_ = @login)
 		if (@char_count > @max_char)
-			rollback transaction
+		begin
+			--rollback transaction
+			raiserror('account new char error', 11, 1)
+			rollback tran
+		end
 		fetch next from cur into @login, @password
 	end
 	close cur
 end
 go
 --7 end
+
+--8
+if OBJECT_ID ('account_character_deleter', 'tr') is not null
+	drop trigger account_character_deleter
+go
+
+create trigger account_character_deleter
+on chars_on_account
+for insert
+as 
+begin
+	declare @account int, @char int
+
+	declare cur cursor for (select account, character_ from inserted)
+	open cur
+	fetch next from cur into @account, @char
+	while @@FETCH_STATUS=0
+	begin
+		begin try
+			update accounts
+				set characters_count += 1
+		end try
+		begin catch
+			rollback tran
+			delete from chars_on_account where account = @account and character_ = @char
+			delete from characters where id = @char
+		end catch
+
+		fetch next from cur into @account, @char
+	end
+	close cur
+end
+go
+--8 end
 
 --9
 if OBJECT_ID ('items_in_inventory_durabillity_check', 'tr') is not null
@@ -385,6 +509,38 @@ end
 go
 --14 end
 
+--15
+if OBJECT_ID ('bank_fraction_check', 'tr') is not null
+	drop trigger bank_fraction_check
+go
+
+create trigger bank_fraction_check
+on banks
+for insert
+as 
+begin
+	declare @multifr bit, @net_name varchar(max), @city int
+	declare cur1 cursor for (select multifraction, net_name,city from inserted)
+	open cur1
+	fetch next from cur1 into @multifr, @net_name, @city
+	while @@FETCH_STATUS=0
+	begin
+		if @multifr != 1
+		begin
+			declare @fraction int, @city_fraction int
+			set @city_fraction = (select fraction from cities where id = @city)
+			--set @fraction = (select fra from banks where)
+			set @fraction = (select fraction from locations where id = (select location from cities where id = (select top 1 city from banks where net_name = @net_name)))
+			if @city_fraction != @fraction
+				rollback tran
+		end
+		fetch next from cur1 into @multifr, @net_name, @city
+	end
+	close cur1
+end
+go
+--15 end
+
 --16
 if OBJECT_ID ('achivements_recalculate', 'tr') is not null
 	drop trigger achivements_recalculate
@@ -458,6 +614,34 @@ begin
 end
 go
 --17 end
+
+--19
+if OBJECT_ID ('auction_delete_items_move', 'tr') is not null
+	drop trigger auction_delete_items_move
+go
+
+create trigger auction_delete_items_move
+on items_on_auction
+for delete
+as 
+begin
+	declare @item int, @owner int
+
+	declare cur19 cursor for (select item, owner_ from deleted)
+	open cur19
+	fetch next from cur19 into @item, @owner
+	while @@FETCH_STATUS=0
+	begin
+		declare @inv int
+		set @inv = (select inventory from characters where id = @owner)
+		insert into items_in_inventory(inv, item) values
+		(@inv, @item)
+		fetch next from cur19 into @item, @owner
+	end
+	close cur19
+end
+go
+--19 end
 
 --20
 if OBJECT_ID ('quest_line_delete_quest_delete', 'tr') is not null
