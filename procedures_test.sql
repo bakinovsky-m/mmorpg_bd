@@ -14,3 +14,9 @@ select top 1 * from characters
 exec dbo.mmmmonster_kill 1, 1
 select top 1 * from characters
 --3 end
+
+--4
+select * from items_on_auction
+exec bet_on_auction 1, 1, 3
+select * from items_on_auction
+--4 end

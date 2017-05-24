@@ -84,3 +84,40 @@ as begin
 end
 go
 --3 end
+
+--5
+drop proc bet_on_auction
+go
+
+create proc bet_on_auction(@char int, @pos_on_auction int, @bet int)
+as begin
+	declare @item int, @current_price int, @ransom_price int
+	set @item = (select item from items_on_auction where id = @pos_on_auction)
+	set @current_price = (select current_price from items_on_auction where id = @pos_on_auction)
+	set @ransom_price = (select ransom_price from items_on_auction where id = @pos_on_auction)
+
+	if @bet > @current_price and @bet < @ransom_price
+	begin
+		update items_on_auction
+			set current_price = @bet, last_better = @char
+			where id = @pos_on_auction
+		update characters
+			set gold -= @bet where id = @char
+	end
+	else
+	begin 
+	if @bet > @ransom_price
+	begin 
+		insert into items_in_inventory(inv, item) values
+		((select inventory from characters where id = @char), @item)
+
+		delete from items_on_auction where id = @pos_on_auction
+
+		update characters
+			set gold -= @bet where id = @char
+	end
+	end
+
+end
+go
+--5 end

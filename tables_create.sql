@@ -437,6 +437,7 @@ constraint fk_monsters_in_dungeon_dungeon foreign key(dungeon) references dungeo
 --go
 
 create table items_on_auction(
+id int identity(1,1),
 item int not null,
 auction int not null,
 start_price int not null,
