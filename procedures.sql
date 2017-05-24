@@ -2,8 +2,7 @@ use mmorpg;
 go
 
 -- 1
-if OBJECT_ID('account_create', 'PR') is not null
-	drop proc account_create
+drop proc account_create
 go
 
 create proc account_create(@login varchar(max), @password varchar(max))
@@ -32,3 +31,21 @@ as begin
 end
 go
 --1 end
+
+--2
+drop proc character_create
+go
+
+create proc character_create(@account int, @name varchar(max), @class int, @race int)
+as begin
+	insert into inventories(size, fullness) values
+	(10, 0)
+
+	insert into characters(name, race, class, inventory) values
+	(@name, @race, @class, (select top 1 id from inventories order by id desc))
+
+	insert into chars_on_account(account, character_) values
+	(@account, (select top 1 id from characters order by id desc))
+end
+go
+--2 end

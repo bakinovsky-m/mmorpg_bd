@@ -260,9 +260,9 @@ as
 begin
 	declare @login varchar(max), @password varchar(max)
 
-	declare cur cursor for (select login_, password_ from inserted)
-	open cur
-	fetch next from cur into @login, @password
+	declare cur7 cursor for (select login_, password_ from inserted)
+	open cur7
+	fetch next from cur7 into @login, @password
 	while @@FETCH_STATUS=0
 	begin
 		if (@login = @password)
@@ -277,9 +277,9 @@ begin
 			raiserror('account new char error', 11, 1)
 			rollback tran
 		end
-		fetch next from cur into @login, @password
+		fetch next from cur7 into @login, @password
 	end
-	close cur
+	close cur7
 end
 go
 --7 end
