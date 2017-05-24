@@ -52,3 +52,95 @@ begin
 end
 go
 --2 end
+
+--3
+--3. Подсчёт количества персонажей с заданным классом старше заданного уровня
+--Вход: класс, уровень
+--Выход: число
+--Использует: “Персонаж”
+if object_id('chars_count_with_class_and_lvl', 'FN') is not null
+	drop function chars_count_with_class_and_lvl
+go
+
+create function chars_count_with_class_and_lvl(@class int, @lvl int)
+returns int
+as
+begin
+	declare @res int
+	set @res = (select count(*) from characters where class = @class and level_ >= @lvl)
+	return @res
+end
+go
+--3 end
+
+--4
+--4. Расчёт, успеет ли персонаж убить монстра раньше, чем монстр убьёт его
+--Вход: персонаж, монстр
+--Выход: да/нет
+--Использует: “Персонаж”, “Монстр”
+if object_id('char_monster_fight_calc', 'FN') is not null
+	drop function char_monster_fight_calc
+go
+
+create function char_monster_fight_calc(@char int, @monster int)
+returns bit
+as
+begin
+	declare @c_attack int, @c_defense int, @c_health int
+	declare @m_attack int, @m_defense int, @m_health int
+	declare @res bit
+
+	set @c_attack = (select attack from characters where id = @char)
+	set @c_defense = (select defense from characters where id = @char)
+	set @c_health = (select health from characters where id = @char)
+
+	set @m_attack = (select attack from monsters where id = @monster)
+	set @m_defense = (select defense from monsters where id = @monster)
+	set @m_health = (select health from monsters where id = @monster)
+
+	while @c_health >= 0 and @m_health >= 0
+	begin
+		set @c_health = @c_health - (@m_attack - @c_defense)
+		set @m_health = @m_health - (@c_attack - @m_defense)
+	end
+	if @c_health <= 0
+		set @res = 0
+	else
+		set @res = 1
+	return @res
+end
+go
+--4 end
+
+--5
+
+if object_id('full_unwore_items_cost_on_auction', 'FN') is not null
+	drop function full_unwore_items_cost_on_auction
+go
+
+create function full_unwore_items_cost_on_auction(@char int, @auction int)
+returns int
+as
+begin
+	declare @price int
+
+	declare @item int
+	
+	set @price = 0
+	declare curs cursor for (select item from items_in_inventory where inv = (select inventory from characters where id = @char) and on_char = 0)
+	open curs
+	fetch next from curs into @item
+	while @@FETCH_STATUS = 0
+	begin
+		declare @temp int
+		set @temp = (select min(current_price) from items_on_auction where item = @item and auction = @auction)
+		set @price += @temp
+
+		fetch next from curs into @item
+	end
+
+	return @price
+end
+go
+
+--5 end
