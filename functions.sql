@@ -38,7 +38,6 @@ begin
 	while @@FETCH_STATUS = 0
 	begin
 		declare @type varchar(max)
-		--set @type = (select feature_value from items where id = @item)
 		set @type = (select feauture_name from item_types where id = (select type_ from items where id = @item))
 		if @type = 'defense'
 		begin
@@ -54,10 +53,6 @@ go
 --2 end
 
 --3
---3. Подсчёт количества персонажей с заданным классом старше заданного уровня
---Вход: класс, уровень
---Выход: число
---Использует: “Персонаж”
 if object_id('chars_count_with_class_and_lvl', 'FN') is not null
 	drop function chars_count_with_class_and_lvl
 go
@@ -74,10 +69,7 @@ go
 --3 end
 
 --4
---4. Расчёт, успеет ли персонаж убить монстра раньше, чем монстр убьёт его
---Вход: персонаж, монстр
---Выход: да/нет
---Использует: “Персонаж”, “Монстр”
+
 if object_id('char_monster_fight_calc', 'FN') is not null
 	drop function char_monster_fight_calc
 go

@@ -273,7 +273,6 @@ begin
 		set @char_count = (select characters_count from accounts where login_ = @login)
 		if (@char_count > @max_char)
 		begin
-			--rollback transaction
 			raiserror('account new char error', 11, 1)
 			rollback tran
 		end
@@ -537,7 +536,6 @@ begin
 		begin
 			declare @fraction int, @city_fraction int
 			set @city_fraction = (select fraction from cities where id = @city)
-			--set @fraction = (select fra from banks where)
 			set @fraction = (select fraction from locations where id = (select location from cities where id = (select top 1 city from banks where net_name = @net_name)))
 			if @city_fraction != @fraction
 				rollback tran

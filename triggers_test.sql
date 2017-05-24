@@ -46,7 +46,6 @@ select * from characters
 
 --5
 insert into chars_in_raid(char_, raid) values
---(1, 1),
 (1, 3)
 --5 end
 
