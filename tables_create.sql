@@ -252,7 +252,10 @@ defense int,
 
 experience bigint default 0,
 level_ int default 1,
+
 inventory int not null,
+gold bigint default 100,
+
 guild int,
 fraction int,
 
