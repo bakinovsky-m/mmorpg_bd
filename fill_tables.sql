@@ -335,7 +335,7 @@ insert into items_in_cell(cell, item) values
 
 
 insert into items_in_inventory(inv, item, durability_, on_char) values
-(1, 1, 100, 1),
+(1, 3, 100, 1),
 (2, 1, 100, 1),
 (3, 1, 100, 1),
 (4, 1, 100, 1),
