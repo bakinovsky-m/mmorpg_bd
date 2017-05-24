@@ -49,3 +49,38 @@ as begin
 end
 go
 --2 end
+
+--3
+drop proc mmmmonster_kill
+go
+
+create proc mmmmonster_kill(@char int, @monster int)
+as begin
+	declare @fight_result bit
+	set @fight_result = (select dbo.char_monster_fight_calc(@char, @monster))
+	if @fight_result = 1
+	begin
+		declare @monster_item int, @char_inv int
+
+		set @char_inv = (select inventory from characters where id = @char)
+
+		declare curs_m cursor local for (select item from items_on_monster)
+		open curs_m
+		fetch next from curs_m into @monster_item
+		while @@FETCH_STATUS = 0
+		begin
+			insert into items_in_inventory(inv, item) values
+			(@char_inv, @monster_item)
+
+			update characters
+				set experience += (select lvl from monsters where id = @monster) * 10
+				where id = @char
+			
+
+			fetch next from curs_m into @monster_item
+		end
+		close curs_m
+	end
+end
+go
+--3 end

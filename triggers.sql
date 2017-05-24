@@ -161,7 +161,7 @@ on characters
 for update
 as 
 begin
-	declare @ins_exp int, @id int
+	declare @ins_exp bigint, @id int
 	set @ins_exp = (select experience from inserted)
 	set @id = (select id from inserted)
 	if @ins_exp != 0
