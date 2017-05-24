@@ -16,7 +16,11 @@ select top 1 * from characters
 --3 end
 
 --4
+exec dbo.raid 1
+--4 end
+
+--5
 select * from items_on_auction
 exec bet_on_auction 1, 1, 3
 select * from items_on_auction
---4 end
+--5 end

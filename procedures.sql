@@ -85,6 +85,45 @@ end
 go
 --3 end
 
+--4
+drop proc raid
+go
+
+create proc raid(@raid int)
+as begin
+	declare @dung int, @monster int, @win_flag bit, @leader int
+	set @win_flag = 1
+	set @dung = (select dungeon from raid_groups where id = @raid)
+	set @leader = (select leader from raid_groups where id = @raid)
+
+	declare cur_m1 cursor local for (select monster from monsters_in_dungeon where dungeon = @dung)
+	open cur_m1
+	fetch next from cur_m1 into @monster
+	while @@FETCH_STATUS = 0
+	begin
+		if not exists (select * from chars_in_raid where raid = @raid and exists (select dbo.char_monster_fight_calc(@monster, char_)))
+			set @win_flag = 0
+
+		fetch next from cur_m1 into @monster
+	end
+	close cur_m1
+
+	if @win_flag = 1
+	begin
+		declare cur_m2 cursor local for (select monster from monsters_in_dungeon where dungeon = @dung)
+		open cur_m2
+		fetch next from cur_m2 into @monster
+		while @@FETCH_STATUS = 0
+		begin
+			exec mmmmonster_kill @leader, @monster
+			fetch next from cur_m2 into @monster
+		end
+		close cur_m2
+	end
+end
+go
+--4 end
+
 --5
 drop proc bet_on_auction
 go
