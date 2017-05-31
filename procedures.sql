@@ -130,10 +130,11 @@ go
 
 create proc bet_on_auction(@char int, @pos_on_auction int, @bet int)
 as begin
-	declare @item int, @current_price int, @ransom_price int
+	declare @item int, @current_price int, @ransom_price int, @owner int
 	set @item = (select item from items_on_auction where id = @pos_on_auction)
 	set @current_price = (select current_price from items_on_auction where id = @pos_on_auction)
 	set @ransom_price = (select ransom_price from items_on_auction where id = @pos_on_auction)
+	set @owner = (select owner_ from items_on_auction where id = @pos_on_auction)
 
 	if @bet > @current_price and @bet < @ransom_price
 	begin
@@ -154,6 +155,9 @@ as begin
 
 		update characters
 			set gold -= @bet where id = @char
+		update characters
+			set gold += @bet where id = @owner
+			
 	end
 	end
 
